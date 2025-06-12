@@ -5,16 +5,16 @@ const { join } = require('path');
 async function build() {
   try {
     // Build the main package
-    await esbuild.build({
-      entryPoints: ['src/index.ts'],
-      bundle: true,
-      platform: 'node',
-      target: 'node16',
-      outfile: 'dist/index.js',
-      sourcemap: true,
-      minify: false,
-      format: 'cjs',
-    });
+    // await esbuild.build({
+    //   entryPoints: ['src/index.ts'],
+    //   bundle: true,
+    //   platform: 'node',
+    //   target: 'node16',
+    //   outfile: 'dist/index.js',
+    //   sourcemap: true,
+    //   minify: false,
+    //   format: 'cjs',
+    // });
 
     // Build the CLI executable without a banner
     await esbuild.build({
@@ -22,15 +22,15 @@ async function build() {
       bundle: true,
       platform: 'node',
       target: 'node16',
-      outfile: 'bin/encli',
-      sourcemap: true,
+      outfile: './bin/encli',
+      // sourcemap: true,
       minify: false,
       format: 'cjs',
     });
 
     // Make the CLI executable
-    const cliPath = join(__dirname, 'bin/encli');
-    await chmod(cliPath, 0o755);
+    // const cliPath = join(__dirname, 'bin/encli');
+    await chmod('./bin/encli', 0o755);
 
     console.log('Build completed successfully!');
   } catch (error) {

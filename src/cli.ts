@@ -7,7 +7,7 @@
 
 import { Command } from 'commander';
 import { registerTestCommand } from './commands/test';
-import { registerEifCommand } from './commands/eif/eif';
+import { registerEifCommand } from './commands/eif';
 import { registerLoginCommand } from './commands/login';
 
 // Create a new Commander program

@@ -4,7 +4,7 @@
 
 import { Command } from 'commander';
 import { registerSignBuildCommand } from './sign_build';
-import { registerSignReleaseCommand } from './eif_sign_release';
+import { registerSignReleaseCommand } from './sign_release';
 
 /**
  * Register the eif command group with the CLI
