@@ -1,17 +1,17 @@
-# @enclaved/encli
+# encli
 
 CLI utilities for working with enclaved application server for TEEs.
 
 ## Installation
 
 ```bash
-npm install -g @enclaved/encli
+npm install -g encli
 ```
 
 Or use it directly with npx:
 
 ```bash
-npx @enclaved/encli [command]
+npx encli [command]
 ```
 
 ## Usage

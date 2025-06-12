@@ -7,13 +7,12 @@ function filename() {
 }
 
 export async function login(bunkerUrl?: string) {
-  const client = new Nip46Client({
+  using client = new Nip46Client({
     bunkerUrl,
     relayUrl: bunkerUrl ? undefined : "wss://relay.nsec.app",
     filename: filename(),
   });
-  await client.login();
-  const authPubkey = await client.getPublicKey();
+  const authPubkey = await client.login();
   console.log("signed in as", authPubkey);
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @enclaved/encli
+ * encli
  * CLI entry point
  */
 
@@ -9,6 +9,7 @@ import { Command } from 'commander';
 import { registerTestCommand } from './commands/test';
 import { registerEifCommand } from './commands/eif';
 import { registerLoginCommand } from './commands/login';
+import { registerDockerCommand } from './commands/docker';
 
 // Create a new Commander program
 const program = new Command();
@@ -22,6 +23,7 @@ program
 // Register commands
 registerTestCommand(program);
 registerEifCommand(program);
+registerDockerCommand(program);
 registerLoginCommand(program);
 
 // Add more commands here as needed

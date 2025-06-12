@@ -1,5 +1,5 @@
 /**
- * @enclaved/encli
+ * encli
  * CLI utilities for working with enclaved application server for TEEs
  */
 

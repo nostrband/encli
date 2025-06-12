@@ -1,11 +1,11 @@
 {
   "name": "@enclaved/encli",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "CLI utilities for working with enclaved application server for TEEs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "encli": "./bin/encli"
+    "encli": "bin/encli"
   },
   "scripts": {
     "build": "node build.js && tsc --emitDeclarationOnly",
@@ -43,5 +43,8 @@
   "files": [
     "dist",
     "bin"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

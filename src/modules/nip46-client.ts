@@ -67,6 +67,7 @@ export class Nip46Client extends Client implements Signer {
     console.log(nostrconnect);
 
     return new Promise<void>((ok) => {
+      const subId = bytesToHex(randomBytes(6));
       const onEvent = (e: Event) => {
         const {
           id: replyId,
@@ -77,13 +78,14 @@ export class Nip46Client extends Client implements Signer {
         if (result === secret) {
           console.log("connected to", e.pubkey);
           this.signerPubkey = e.pubkey;
+          this.relay.close(subId);
           ok();
         }
       };
 
       this.relay.req({
         fetch: false,
-        id: bytesToHex(randomBytes(6)),
+        id: subId,
         filter: {
           kinds: [this.kind],
           "#p": [getPublicKey(this.privkey!)],
@@ -114,8 +116,6 @@ export class Nip46Client extends Client implements Signer {
   }
 
   public async login() {
-    this.ensureReadFile();
-
     this.privkey = generateSecretKey();
     if (this.signerPubkey) {
       const ack = await this.send({
@@ -136,6 +136,12 @@ export class Nip46Client extends Client implements Signer {
         })
       );
     }
+
+    this.subscribe();
+    const pubkey = await this.getPublicKey();
+    this.unsubscribe();
+
+    return pubkey;
   }
 
   public logout() {

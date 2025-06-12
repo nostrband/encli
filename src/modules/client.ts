@@ -10,6 +10,7 @@ export class Client {
   protected kind: number;
   protected relay: Relay;
   protected signerPubkey?: string;
+  private subId?: string;
 
   protected privkey?: Uint8Array;
   private pending = new Map<
@@ -17,6 +18,7 @@ export class Client {
     {
       ok: (result: string) => void;
       err: (e: any) => void;
+      timer: any;
     }
   >();
 
@@ -35,6 +37,11 @@ export class Client {
     this.relay = new Relay(relayUrl);
     this.signerPubkey = signerPubkey;
     this.privkey = privkey;
+  }
+
+  public [Symbol.dispose]() {
+    this.relay[Symbol.dispose]();
+    this.pending.clear();
   }
 
   public getRelay() {
@@ -80,14 +87,14 @@ export class Client {
     await this.relay.publish(event);
 
     return new Promise<string>((ok, err) => {
-      this.pending.set(req.id, { ok, err });
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         const cbs = this.pending.get(req.id);
         if (cbs) {
           this.pending.delete(req.id);
           cbs.err("Request timeout");
         }
       }, timeout);
+      this.pending.set(req.id, { ok, err, timer });
     });
   }
 
@@ -96,23 +103,31 @@ export class Client {
       nip44.decrypt(this.privkey!, this.signerPubkey!, e.content)
     );
     console.log("reply", { id, result, error });
+
+    // context
+    const cbs = this.pending.get(id);
+
+    // already replied?
+    if (!cbs) return;
+
+    // auth?
     if (result === "auth_url") {
       console.log("Open auth url: ", error);
       return;
     }
 
-    const cbs = this.pending.get(id);
-    if (!cbs) return;
+    // done
     this.pending.delete(id);
-
+    clearTimeout(cbs.timer);
     if (error) cbs.err(error);
     else cbs.ok(result);
   }
 
   protected subscribe() {
+    this.subId = bytesToHex(randomBytes(6));
     this.relay.req({
       fetch: false,
-      id: bytesToHex(randomBytes(6)),
+      id: this.subId,
       filter: {
         kinds: [this.kind],
         authors: [this.signerPubkey!],
@@ -121,5 +136,12 @@ export class Client {
       },
       onEvent: this.onReplyEvent.bind(this),
     });
+  }
+
+  protected unsubscribe() {
+    if (this.subId) {
+      this.relay.close(this.subId);
+    }
+    this.subId = undefined;
   }
 }

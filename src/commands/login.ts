@@ -25,5 +25,6 @@ export function registerLoginCommand(program: Command): void {
     .option('--bunker-url <url>', 'Specify the bunker URL')
     .action(async (options: { bunkerUrl?: string }) => {
       await runLogin(options);
+      console.log("done");
     });
 }

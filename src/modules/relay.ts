@@ -33,7 +33,7 @@ export class Relay {
     this.connect();
   }
 
-  public dispose() {
+  public [Symbol.dispose]() {
     if (this.ws && this.ws.readyState !== WebSocket.CONNECTING) this.ws.close();
     this.ws = undefined;
     this.publishing.clear();
@@ -72,10 +72,10 @@ export class Relay {
       e.reason,
       e.wasClean
     );
-    setTimeout(() => {
-      // stop if disposed
-      if (this.ws) this.connect();
-    }, PAUSE);
+
+    // FIXME add backoff
+    // reconnect?
+    if (this.ws) setTimeout(() => this.connect(), PAUSE);
   }
 
   private onError(e: any) {
