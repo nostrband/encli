@@ -17,27 +17,18 @@ import { Client } from "./client";
 const nip44 = new Nip44();
 
 export class Nip46Client extends Client implements Signer {
-  private perms: string;
-  private filename?: string;
   private userPubkey?: string;
-  private secret?: string;
 
-  constructor({
+  static async login({
     bunkerUrl,
     relayUrl,
-    perms = "",
     filename,
-    signerPubkey,
-    privkey,
-    secret,
+    perms,
   }: {
+    filename: string;
     bunkerUrl?: string;
     relayUrl?: string;
     perms?: string;
-    filename?: string;
-    signerPubkey?: string;
-    privkey?: Uint8Array;
-    secret?: string;
   }) {
     const burl = bunkerUrl ? new URL(bunkerUrl) : undefined;
     if (!relayUrl && !burl) throw new Error("Provide relay url or bunker url");
@@ -45,28 +36,89 @@ export class Nip46Client extends Client implements Signer {
       relayUrl = burl!.searchParams.get("relay") || "";
       if (!relayUrl) throw new Error("Bunker url has no relay");
     }
-    if (!secret && burl) {
-      secret = burl.searchParams.get("secret") || undefined;
-    }
-    if (!signerPubkey && burl) {
-      signerPubkey = burl.hostname || burl.pathname.split("//")[1];
+    const secret = burl?.searchParams.get("secret") || undefined;
+    let signerPubkey =
+      burl?.hostname || burl?.pathname.split("//")[1] || undefined;
+    const privkey = generateSecretKey();
+
+    using client = new Nip46Client({
+      relayUrl,
+      signerPubkey,
+      privkey,
+    });
+
+    if (signerPubkey) {
+      await client.connect(secret || "", perms);
+    } else {
+      signerPubkey = await client.nostrconnect(perms);
     }
 
-    super({ relayUrl, kind: KIND_NIP46, signerPubkey, privkey });
-    this.perms = perms;
-    this.filename = filename;
-    this.secret = secret;
+    fs.writeFileSync(
+      filename,
+      JSON.stringify({
+        csk: bytesToHex(privkey!),
+        spk: signerPubkey,
+        url: client.relay.url,
+      })
+    );
+
+    client.subscribe();
+    const pubkey = await client.getPublicKey();
+    client.unsubscribe();
+
+    return pubkey;
   }
 
-  private async nostrconnect() {
+  static logout(filename: string) {
+    fs.rmSync(filename);
+  }
+
+  static fromFile(filename: string) {
+    try {
+      const data = fs.readFileSync(filename).toString("utf8");
+      const { csk, spk, url } = JSON.parse(data);
+      if (csk && spk && url) {
+        return new Nip46Client({
+          privkey: Buffer.from(csk, "hex"),
+          signerPubkey: spk,
+          relayUrl: url,
+        });
+      }
+    } catch {}
+    throw new Error("Login please");
+  }
+
+  constructor({
+    relayUrl,
+    signerPubkey,
+    privkey,
+  }: {
+    relayUrl?: string;
+    signerPubkey?: string;
+    privkey?: Uint8Array;
+  }) {
+    if (!relayUrl) throw new Error("Provide relay url");
+    if (!privkey) throw new Error("Provide signer privkey");
+    super({ relayUrl, kind: KIND_NIP46, signerPubkey, privkey });
+  }
+
+  private async connect(secret: string, perms?: string) {
+    const ack = await this.send({
+      method: "connect",
+      params: [this.signerPubkey, secret, perms || ""],
+    });
+    if (ack !== "ack") throw new Error("Failed to connect");
+  }
+
+  private async nostrconnect(perms?: string) {
     const secret = bytesToHex(randomBytes(16));
     const nostrconnect = `nostrconnect://${getPublicKey(this.privkey!)}?relay=${
       this.relay.url
-    }&perms=${this.perms}&name=encli&secret=${secret}`;
+    }&perms=${perms || ""}&name=encli&secret=${secret}`;
     console.log("Connect using this string:");
     console.log(nostrconnect);
 
-    return new Promise<void>((ok) => {
+    return new Promise<string>((ok) => {
       const subId = bytesToHex(randomBytes(6));
       const onEvent = (e: Event) => {
         const {
@@ -79,7 +131,7 @@ export class Nip46Client extends Client implements Signer {
           console.log("connected to", e.pubkey);
           this.signerPubkey = e.pubkey;
           this.relay.close(subId);
-          ok();
+          ok(this.signerPubkey);
         }
       };
 
@@ -96,57 +148,10 @@ export class Nip46Client extends Client implements Signer {
     });
   }
 
-  private ensureReadFile() {
-    if (this.filename && !this.privkey) {
-      try {
-        const data = fs.readFileSync(this.filename).toString("utf8");
-        const { csk, spk } = JSON.parse(data);
-        if (csk && spk) {
-          this.privkey = Buffer.from(csk, "hex");
-          this.signerPubkey = spk;
-        }
-      } catch {}
-    }
-  }
-
   public async start() {
-    this.ensureReadFile();
+    // this.ensureReadFile();
     if (!this.signerPubkey) throw new Error("Login please");
     this.subscribe();
-  }
-
-  public async login() {
-    this.privkey = generateSecretKey();
-    if (this.signerPubkey) {
-      const ack = await this.send({
-        method: "connect",
-        params: [this.signerPubkey, this.secret || "", this.perms],
-      });
-      if (ack !== "ack") throw new Error("Failed to connect");
-    } else {
-      await this.nostrconnect();
-    }
-
-    if (this.filename) {
-      fs.writeFileSync(
-        this.filename,
-        JSON.stringify({
-          csk: bytesToHex(this.privkey!),
-          spk: this.signerPubkey,
-        })
-      );
-    }
-
-    this.subscribe();
-    const pubkey = await this.getPublicKey();
-    this.unsubscribe();
-
-    return pubkey;
-  }
-
-  public logout() {
-    if (this.filename) fs.rmSync(this.filename);
-    this.privkey = undefined;
   }
 
   async getPublicKey(): Promise<string> {

@@ -10,6 +10,7 @@ import { registerTestCommand } from './commands/test';
 import { registerEifCommand } from './commands/eif';
 import { registerLoginCommand } from './commands/login';
 import { registerDockerCommand } from './commands/docker';
+import { registerLogoutCommand } from './commands/logout';
 
 // Create a new Commander program
 const program = new Command();
@@ -25,6 +26,7 @@ registerTestCommand(program);
 registerEifCommand(program);
 registerDockerCommand(program);
 registerLoginCommand(program);
+registerLogoutCommand(program);
 
 // Add more commands here as needed
 

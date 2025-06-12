@@ -7,29 +7,24 @@ function filename() {
 }
 
 export async function login(bunkerUrl?: string) {
-  using client = new Nip46Client({
+  const pubkey = await Nip46Client.login({
     bunkerUrl,
-    relayUrl: bunkerUrl ? undefined : "wss://relay.nsec.app",
     filename: filename(),
+    relayUrl: bunkerUrl ? undefined : "wss://relay.nsec.app",
   });
-  const authPubkey = await client.login();
-  console.log("signed in as", authPubkey);
+  console.log("signed in as", pubkey);
 }
 
 export async function logout() {
-  const client = new Nip46Client({
-    filename: filename(),
-  });
-  client.logout();
+  Nip46Client.logout(filename());
 }
 
 export async function createSigner(pubkey?: string): Promise<Signer> {
-  const client = new Nip46Client({
-    filename: filename(),
-  });
+  const client = Nip46Client.fromFile(filename());
   await client.start();
   const authPubkey = await client.getPublicKey();
   console.log("signed in as", authPubkey);
-  if (pubkey && pubkey !== authPubkey) throw new Error("Need to login as " + pubkey);
+  if (pubkey && pubkey !== authPubkey)
+    throw new Error("Need to login as " + pubkey);
   return client;
 }

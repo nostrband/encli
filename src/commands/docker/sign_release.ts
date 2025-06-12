@@ -26,6 +26,8 @@ export async function runSignRelease({
   prod: boolean;
   repo: string;
 }) {
+  const signer = await createSigner();
+
   const { code, err, out } = await exec("docker", ["image", "inspect", uri]);
   if (code !== 0) {
     console.log("Failed to inspect image", uri, err);
@@ -75,7 +77,6 @@ export async function runSignRelease({
   if (version !== pkg.version)
     throw new Error("Package version doesn't match version label");
 
-  const signer = await createSigner();
   const pubkey = await signer.getPublicKey();
 
   if (!signers.includes(pubkey))
