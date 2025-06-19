@@ -2,7 +2,7 @@ import { Event, validateEvent, verifyEvent } from "nostr-tools";
 import { KIND_DOCKER_RELEASE_SIGNATURE } from "./consts";
 import { tv } from "./utils";
 
-export async function validateDockerReleaseSignature(
+export function validateDockerReleaseSignature(
   sig: Event,
   {
     id,
@@ -26,5 +26,6 @@ export async function validateDockerReleaseSignature(
   if (tv(sig, "v") !== version) return false;
   if (tv(sig, "x") !== id) return false;
   if (!validateEvent(sig)) return false;
+  console.log("valid docker release signature", sig);
   return true;
 }

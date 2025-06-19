@@ -1,21 +1,8 @@
-import fs from "node:fs";
-import { Event, UnsignedEvent, nip19 } from "nostr-tools";
-import { AttestationInfo, Signer } from "./types";
-import {
-  CERT_TTL,
-  ENCLAVED_RELAY,
-  KIND_ENCLAVED_CERTIFICATE,
-  KIND_ENCLAVED_PROCESS,
-  KIND_ANNOUNCEMENT,
-  KIND_PROFILE,
-  KIND_RELAYS,
-  KIND_ROOT_CERTIFICATE,
-} from "./consts";
+import { Event, UnsignedEvent } from "nostr-tools";
+import { Signer } from "./types";
+import { ENCLAVED_RELAY, KIND_RELAYS } from "./consts";
 import { now } from "./utils";
 import { Relay } from "./relay";
-import { bytesToHex } from "@noble/hashes/utils";
-import { PrivateKeySigner } from "./signer";
-import { X509Certificate } from "node:crypto";
 
 export const DEFAULT_RELAYS = [
   "wss://relay.damus.io",
@@ -33,9 +20,10 @@ export const OUTBOX_RELAYS = [
 ];
 
 export async function publish(event: Event, relays?: string[]) {
+  console.log("publishing", JSON.stringify(event), relays);
   const promises = (relays || DEFAULT_RELAYS).map((r) => {
-    using relay = new Relay(r);
-    return relay.publish(event);
+    const relay = new Relay(r);
+    return relay.publish(event).finally(() => relay[Symbol.dispose]());
   });
   const results = await Promise.allSettled(promises);
   if (!results.find((r) => r.status === "fulfilled"))
@@ -64,4 +52,3 @@ export async function publishNip65Relays(signer: Signer, relays?: string[]) {
   const event = await signPublish(tmpl, signer, OUTBOX_RELAYS);
   console.log("published outbox relays", event, OUTBOX_RELAYS);
 }
-

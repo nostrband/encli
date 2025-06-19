@@ -21,30 +21,31 @@ export async function runPublishRelease({
   uri,
   dir,
   prod,
-  repo,
 }: {
   uri: string;
   dir: string;
   prod: boolean;
-  repo: string;
 }) {
   // Implementation will be added by the user
-  console.log("Publishing release with options:", { uri, dir, prod, repo });
+  console.log("Publishing release with options:", { uri, dir, prod });
 
-  const { signers, signerRelays, upgradeRelays, version, id } =
+  const { signers, signerRelays, upgradeRelays, version, id, hubUris, repo } =
     await dockerInspect(uri);
 
   console.log("docker id", id);
+  console.log("docker hub uris", hubUris);
   console.log("signers", signers);
   console.log("signerRelays", signerRelays);
   console.log("upgradeRelays", upgradeRelays);
   console.log("version", version);
+  console.log("repo", repo);
 
   const pkg = readPackageJson();
   console.log("package.json", pkg);
 
   if (version !== pkg.version)
     throw new Error("Package version doesn't match version label");
+  if (!hubUris.length) throw new Error("Publish the docker image first");
 
   using signer = await createSigner();
   const pubkey = await signer.getPublicKey();
@@ -79,6 +80,7 @@ export async function runPublishRelease({
       ["t", prod ? "prod" : "dev"],
       ["r", repo],
       ["v", version],
+      ["u", hubUris[0]],
       ["x", id, "docker"],
       ...sigs.map(e => ["release", JSON.stringify(e)]),
     ],
@@ -102,13 +104,11 @@ export function registerPublishReleaseCommand(program: Command): void {
       "./build/"
     )
     .option("-p, --prod", "Publish to production environment", false)
-    .requiredOption("-r, --repo <repository>", "Git repository link")
     .action(
       async (options: {
         uri: string;
         dir: string;
         prod: boolean;
-        repo: string;
       }) => {
         await runPublishRelease(options);
       }

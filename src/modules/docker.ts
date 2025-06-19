@@ -10,20 +10,23 @@ export async function dockerInspect(uri: string) {
   const data = JSON.parse(out);
   const info = data[0] as {
     Id: string;
+    RepoDigests: string[];
     Config: {
       Labels: Record<string, string>;
     };
   };
 
-  if (!info.Id) throw new Error("No id in docker image");
+  if (!info.Id || !info.Id.startsWith("sha256:")) throw new Error("No id in docker image");
+  const id = info.Id.split("sha256:")[1];
 
   if (
     !info.Config.Labels ||
     !("signers" in info.Config.Labels) ||
     !("signer_relays" in info.Config.Labels) ||
-    !("version" in info.Config.Labels)
+    !("version" in info.Config.Labels) ||
+    !("repo" in info.Config.Labels)
   ) {
-    console.log("signers, signer_relays and version labels are required");
+    console.log("signers, signer_relays, version and repo labels are required");
     throw new Error("No required labels in docker image");
   }
 
@@ -39,12 +42,15 @@ export async function dockerInspect(uri: string) {
     ? parse(info.Config.Labels["upgrade_relays"])
     : signerRelays;
   const version = info.Config.Labels["version"];
+  const repo = info.Config.Labels["repo"];
 
   return {
-    id: info.Id,
+    id,
+    repo,
     signers,
     signerRelays,
     upgradeRelays,
-    version
+    version,
+    hubUris: info.RepoDigests
   }
 }

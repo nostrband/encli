@@ -19,20 +19,19 @@ export async function runSignRelease({
   uri,
   dir,
   prod,
-  repo,
 }: {
   uri: string;
   dir: string;
   prod: boolean;
-  repo: string;
 }) {
-  console.log("Signing release with options:", { uri, dir, prod, repo });
+  console.log("Signing release with options:", { uri, dir, prod });
 
   const {
     signers,
     signerRelays,
     upgradeRelays,
     version,
+    repo,
     id
   } = await dockerInspect(uri);
 
@@ -41,6 +40,7 @@ export async function runSignRelease({
   console.log("signerRelays", signerRelays);
   console.log("upgradeRelays", upgradeRelays);
   console.log("version", version);
+  console.log("repo", repo);
 
   const pkg = readPackageJson();
   console.log("package.json", pkg);
@@ -91,13 +91,11 @@ export function registerSignReleaseCommand(program: Command): void {
       "Directory containing the build info",
       "./build/"
     )
-    .requiredOption("-r, --repo <repository>", "Git repository link")
     .action(
       async (options: {
         uri: string;
         dir: string;
         prod: boolean;
-        repo: string;
       }) => {
         await runSignRelease(options);
       }
