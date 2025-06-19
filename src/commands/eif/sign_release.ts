@@ -32,7 +32,7 @@ export async function runSignRelease({
   const pkg = readPackageJson();
   console.log("package.json", pkg);
 
-  const signer = await createSigner(pubkey);
+  using signer = await createSigner(pubkey);
 
   const unsigned = {
     created_at: now(),

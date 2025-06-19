@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { networkInterfaces } from "os";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
 import { spawn } from "child_process";
-import { nip19 } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 
 export function now() {
   return Math.floor(Date.now() / 1000);
@@ -147,4 +147,8 @@ export function readPubkey(dir: string) {
 
 export function readPackageJson(): { version: string } {
   return JSON.parse(fs.readFileSync("package.json").toString("utf8").trim());
+}
+
+export function tv(e: Event, name: string) {
+  return e.tags.find((t) => t.length > 1 && t[0] === name)?.[1];
 }

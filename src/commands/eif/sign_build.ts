@@ -38,7 +38,7 @@ export async function runSignBuild({
   const pkg = readPackageJson();
   console.log("package.json", pkg);
 
-  const signer = await createSigner(pubkey);
+  using signer = await createSigner(pubkey);
 
   // PCR8 is unique on every build (the way we do the build)
   // so reuse of this event is impossible
@@ -71,7 +71,7 @@ export function registerSignBuildCommand(program: Command): void {
   program
     .command("sign_build")
     .description("Sign a build of EIF file")
-    .requiredOption("-r, --repo", "Git repo link")
+    .requiredOption("-r, --repo <url>", "Git repo link")
     .option(
       "-d, --dir <directory>",
       "Directory containing the build to sign",
@@ -79,6 +79,7 @@ export function registerSignBuildCommand(program: Command): void {
     )
     .option("-p, --prod", "Sign for production environment", false)
     .action(async (options: { dir: string; prod: boolean; repo: string }) => {
+      console.log("options", options);
       await runSignBuild(options);
     });
 }

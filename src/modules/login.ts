@@ -19,7 +19,7 @@ export async function logout() {
   Nip46Client.logout(filename());
 }
 
-export async function createSigner(pubkey?: string): Promise<Signer> {
+export async function createSigner(pubkey?: string): Promise<Nip46Client> {
   const client = Nip46Client.fromFile(filename());
   await client.start();
   const authPubkey = await client.getPublicKey();
