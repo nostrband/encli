@@ -41,6 +41,7 @@ export class Client {
 
   public [Symbol.dispose]() {
     this.relay[Symbol.dispose]();
+    for (const { timer } of this.pending.values()) clearTimeout(timer);
     this.pending.clear();
   }
 
@@ -99,18 +100,18 @@ export class Client {
   }
 
   private onReplyEvent(e: Event) {
-    const { id, result, error } = JSON.parse(
-      nip44.decrypt(this.privkey!, this.signerPubkey!, e.content)
-    );
+    const data = nip44.decrypt(this.privkey!, this.signerPubkey!, e.content);
+    const { id, result, error } = JSON.parse(data);
     console.log("reply", { id, result, error });
 
     // context
     const cbs = this.pending.get(id);
+    console.log("cbs", id, cbs, data, e);
 
     // already replied?
     if (!cbs) return;
 
-    // auth?
+    // nip46-specific stuff
     if (result === "auth_url") {
       console.log("Open auth url: ", error);
       return;

@@ -40,11 +40,6 @@ export async function runPublishRelease({
   console.log("version", version);
   console.log("repo", repo);
 
-  const pkg = readPackageJson();
-  console.log("package.json", pkg);
-
-  if (version !== pkg.version)
-    throw new Error("Package version doesn't match version label");
   if (!hubUris.length) throw new Error("Publish the docker image first");
 
   using signer = await createSigner();

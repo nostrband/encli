@@ -42,12 +42,6 @@ export async function runSignRelease({
   console.log("version", version);
   console.log("repo", repo);
 
-  const pkg = readPackageJson();
-  console.log("package.json", pkg);
-
-  if (version !== pkg.version)
-    throw new Error("Package version doesn't match version label");
-
   using signer = await createSigner();
   const pubkey = await signer.getPublicKey();
 

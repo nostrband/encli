@@ -1,6 +1,6 @@
 {
   "name": "@enclaved/encli",
-  "version": "0.1.9",
+  "version": "0.1.12",
   "description": "CLI utilities for working with enclaved application server for TEEs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,11 +21,15 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@getalby/lightning-tools": "^5.2.0",
+    "@getalby/sdk": "^5.1.0",
     "@noble/ciphers": "^1.3.0",
     "@noble/curves": "^1.9.2",
     "@noble/hashes": "^1.8.0",
     "commander": "^11.1.0",
+    "nostr-enclaves": "^2.0.15",
     "nostr-tools": "^2.15.0",
+    "nwc-enclaved-utils": "^2.0.8",
     "ws": "^8.18.2"
   },
   "devDependencies": {

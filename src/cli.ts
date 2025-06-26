@@ -11,6 +11,11 @@ import { registerEifCommand } from './commands/eif';
 import { registerLoginCommand } from './commands/login';
 import { registerDockerCommand } from './commands/docker';
 import { registerLogoutCommand } from './commands/logout';
+import { registerEnclaveCommand } from './commands/enclave';
+import { registerKeycruxCommand } from './commands/keycrux';
+import { registerContainerCommand } from './commands/container';
+import { registerNwcCommand } from './commands/nwc';
+import { registerWalletCommand } from './commands/wallet';
 
 // Create a new Commander program
 const program = new Command();
@@ -27,6 +32,11 @@ registerEifCommand(program);
 registerDockerCommand(program);
 registerLoginCommand(program);
 registerLogoutCommand(program);
+registerEnclaveCommand(program);
+registerKeycruxCommand(program);
+registerContainerCommand(program);
+registerNwcCommand(program);
+registerWalletCommand(program);
 
 // Add more commands here as needed
 

@@ -1,9 +1,9 @@
-import os from "node:os";
 import { Nip46Client } from "./nip46-client";
 import { Signer } from "./types";
+import { getConfigPath } from "./conf";
 
 function filename() {
-  return os.homedir() + "/.encli.json";
+  return getConfigPath();
 }
 
 export async function login(bunkerUrl?: string) {

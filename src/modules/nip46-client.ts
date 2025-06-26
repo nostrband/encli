@@ -11,7 +11,7 @@ import { KIND_NIP46 } from "./consts";
 import { Nip44 } from "./nip44";
 import { now } from "./utils";
 import { Signer } from "./types";
-import fs from "node:fs";
+import { readConfig, writeConfig } from "./conf";
 import { Client } from "./client";
 
 const nip44 = new Nip44();
@@ -53,14 +53,12 @@ export class Nip46Client extends Client implements Signer {
       signerPubkey = await client.nostrconnect(perms);
     }
 
-    fs.writeFileSync(
-      filename,
-      JSON.stringify({
-        csk: bytesToHex(privkey!),
-        spk: signerPubkey,
-        url: client.relay.url,
-      })
-    );
+    writeConfig({
+      ...readConfig(),
+      csk: bytesToHex(privkey!),
+      spk: signerPubkey,
+      url: client.relay.url,
+    });
 
     client.subscribe();
     const pubkey = await client.getPublicKey();
@@ -70,13 +68,18 @@ export class Nip46Client extends Client implements Signer {
   }
 
   static logout(filename: string) {
-    fs.rmSync(filename);
+    // Instead of deleting the file, we'll clear the login-related properties
+    const config = readConfig();
+    delete config.csk;
+    delete config.spk;
+    delete config.url;
+    writeConfig(config);
   }
 
   static fromFile(filename: string) {
     try {
-      const data = fs.readFileSync(filename).toString("utf8");
-      const { csk, spk, url } = JSON.parse(data);
+      const config = readConfig();
+      const { csk, spk, url } = config;
       if (csk && spk && url) {
         return new Nip46Client({
           privkey: Buffer.from(csk, "hex"),

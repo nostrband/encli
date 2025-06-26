@@ -64,14 +64,15 @@ export class Relay {
   }
 
   private onClose(e: CloseEvent) {
-    console.log(
-      new Date(),
-      "relay closed",
-      this.relayUrl,
-      e.code,
-      e.reason,
-      e.wasClean
-    );
+    if (e.code !== 1005 && e.code !== 1006)
+      console.log(
+        new Date(),
+        "relay closed",
+        this.relayUrl,
+        e.code,
+        e.reason,
+        e.wasClean
+      );
 
     // FIXME add backoff
     // reconnect?
