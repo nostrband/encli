@@ -98,4 +98,24 @@ export class KeycruxClient extends Client {
     if (reply !== "pong") throw new Error("Invalid reply");
     console.log("pinged in", Date.now() - start, "ms");
   }
+
+  public async status() {
+    const start = Date.now();
+    const reply = await this.send({
+      method: "status",
+      params: [],
+    });
+    console.log("status received in", Date.now() - start, "ms");
+    return reply;
+  }
+
+  public async has(pcr4: string) {
+    const start = Date.now();
+    const reply = await this.send({
+      method: "has",
+      params: { PCR4: pcr4 },
+    });
+    console.log("has response received in", Date.now() - start, "ms");
+    return reply;
+  }
 }

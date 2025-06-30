@@ -6,7 +6,6 @@
  */
 
 import { Command } from 'commander';
-import { registerTestCommand } from './commands/test';
 import { registerEifCommand } from './commands/eif';
 import { registerLoginCommand } from './commands/login';
 import { registerDockerCommand } from './commands/docker';
@@ -27,7 +26,6 @@ program
   .version(process.env.npm_package_version || '0.1.0');
 
 // Register commands
-registerTestCommand(program);
 registerEifCommand(program);
 registerDockerCommand(program);
 registerLoginCommand(program);

@@ -20,8 +20,8 @@ export async function runListCommand({
 }) {
   const events = await fetchContainers(pubkey, relay);
   for (const e of events) {
-    const ref = tv(e, "r");
-    const state = tv(e, "state");
+    const ref = tv(e, "r") || "-";
+    const state = tv(e, "state") || "unknown";
     const balance = tv(e, "balance") || "0";
     const tm = new Date(e.created_at * 1000).toISOString();
     console.log(`${e.pubkey} ${state} ${tm} ${ref} ${balance} sats`);

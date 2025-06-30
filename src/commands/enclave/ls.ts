@@ -21,9 +21,11 @@ export async function runListCommand({
   const events = await fetchEnclaveServices(pubkey, relay);
   for (const e of events) {
     const name = tv(e, "name");
+    const ref = tv(e, "r") || "-";
+    const ver = tv(e, "v") || "-";
     const relay = tv(e, "relay");
     const tm = new Date(e.created_at * 1000).toISOString();
-    console.log(`${name} ${e.pubkey} ${relay} ${tm}`);
+    console.log(`${name} ${e.pubkey} ${relay} ${tm} ${ref} ${ver}`);
   }
 }
 

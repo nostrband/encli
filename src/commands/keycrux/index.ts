@@ -6,6 +6,8 @@ import { Command } from 'commander';
 import { registerListCommand } from './ls';
 import { registerPingCommand } from './ping';
 import { registerInspectCommand } from './inspect';
+import { registerStatusCommand } from './status';
+import { registerHasCommand } from './has';
 
 /**
  * Register the keycrux command group with the CLI
@@ -20,4 +22,6 @@ export function registerKeycruxCommand(program: Command): void {
   registerListCommand(keycruxCommand);
   registerPingCommand(keycruxCommand);
   registerInspectCommand(keycruxCommand);
+  registerStatusCommand(keycruxCommand);
+  registerHasCommand(keycruxCommand);
 }

@@ -5,6 +5,7 @@
 import { Command } from 'commander';
 import { registerSignReleaseCommand } from './sign_release';
 import { registerPublishReleaseCommand } from './publish_release';
+import { registerInspectCommand } from './inspect';
 
 /**
  * Register the eif command group with the CLI
@@ -18,4 +19,5 @@ export function registerDockerCommand(program: Command): void {
   // Register subcommands
   registerSignReleaseCommand(command);
   registerPublishReleaseCommand(command);
+  registerInspectCommand(command);
 }

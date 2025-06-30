@@ -5,6 +5,7 @@
 import { Command } from "commander";
 import { fetchKeycruxServices } from "../../modules/keycrux";
 import { SEARCH_RELAY } from "../../modules/consts";
+import { tv } from "../../modules/utils";
 
 /**
  * Run the list command
@@ -19,9 +20,10 @@ export async function runListCommand({
 }) {
   const events = await fetchKeycruxServices(pubkey, relay);
   for (const e of events) {
-    const relay = e.tags.find((t) => t.length > 1 && t[0] === "relay")?.[1];
+    const relay = tv(e, "relay") || "-";
+    const ver = tv(e, "v") || "-";
     const tm = new Date(e.created_at * 1000).toISOString();
-    console.log(`${e.pubkey} ${relay} ${tm}`);
+    console.log(`${e.pubkey} ${relay} ${tm} ${ver}`);
   }
 }
 
